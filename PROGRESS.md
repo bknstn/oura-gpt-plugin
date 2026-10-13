@@ -34,14 +34,17 @@
 - Документальная проверка завершена: прямой Oura bearer в MCP несовместим с обязательной audience boundary и запретом token passthrough; Oura PKCE/refresh/scopes подтверждены. ADR добавлен в `docs/adr/0001-oauth-boundary.md`.
 - Проверки кода ещё не запускались; локальный skeleton не создан.
 - Известные ограничения: доступов к Oura application, ChatGPT reviewer flow, домену и credentials нет; реальные OAuth/ChatGPT проверки впереди.
-- Точный следующий шаг: проверить актуальный TypeScript SDK v2 API и зафиксировать точные зависимости, затем добавить loopback-only HTTP MCP skeleton, health endpoint, синтетический protocol smoke, README и команды dev/build/typecheck/test.
+- SDK API и версии проверены по официальной документации/release/source: `@modelcontextprotocol/server` и `client` 2.3.1, Node adapter 2.1.1; SDK требует Node.js >=20, локально доступен Node v22.22.2.
+- Реализован первый вариант loopback-only skeleton (`src/server.ts`), health endpoint, явно синтетический MCP tool, protocol smoke, README, `package.json` с точными прямыми версиями и `tsconfig.json`.
+- Пока нет `package-lock.json`: стандартный `npm view` не получил ответа, package cache пуст. Build/typecheck/protocol smoke не запускались до установки зависимостей.
+- Точный следующий шаг: установить точные зависимости и сгенерировать lockfile; затем выполнить build, typecheck и протокольный smoke, исправить обнаруженные проблемы.
 
 ### Проверка актуальной редакции MCP authorization
 
 - По ссылке `/specification/latest/basic/authorization` подтверждена опубликованная редакция `2026-07-28`; в ADR заменены ссылки на прежнюю редакцию.
 - Уточнено: CIMD/pre-registration предпочтительны, DCR deprecated для backward compatibility; учитывается issuer `iss` и exact issuer validation.
 - Остаток: выбрать/проверить реального authorization intermediary и ChatGPT callback позже, в T2; provider пока не выбран.
-- Следующий шаг: реализовать локальный skeleton на SDK v2.3.1 (Node.js v22 доступен), без auth и upstream calls.
+- Следующий шаг: завершить проверку локального skeleton — установить зависимости, сгенерировать lockfile, выполнить build/typecheck/smoke.
 
 ### Журнал T1 — архитектурное решение по OAuth
 
