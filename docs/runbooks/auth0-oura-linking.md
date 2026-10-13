@@ -3,8 +3,9 @@
 **Checked:** 2026-10-13 (Europe/Warsaw).
 **Status:** documented setup template; no accounts, credentials, domain, or provider configuration exist yet.
 **Related decision:** [ADR 0002](../adr/0002-auth-intermediary-and-oura-linking.md).
+**Oura-operated MCP route:** [ADR 0003](../adr/0003-oura-operated-mcp-route.md).
 
-This runbook records the candidate setup for a future controlled integration spike. Do not use it to connect real Oura data until the terms route below is clarified and the OAuth gates in ADR 0002 pass.
+This runbook records the candidate setup for a future controlled integration spike. Do not use it to connect real Oura data until the Oura route in ADR 0003 is documented as permitted and the OAuth gates in ADR 0002 pass.
 
 ## Values to fill outside Git
 
@@ -76,23 +77,28 @@ Oura's [current API and MCP Agreement](https://cloud.ouraring.com/legal/api-agre
 - §2(a)(i) describes authorized-purpose access through a Collaborator Application to the Oura API, including processing through another technology such as an AI Platform, subject to the Agreement and user consent.
 - §4(d) says a non-Aggregator's LLM use may access/process Oura data solely through the contract-defined MCP Server, and separately prohibits using the Oura API to provide input or data to an AI Model or AI Platform.
 - §§2(c–d) separately restrict an `Aggregator` to pass-through for End Customers, prohibit AI transfer/use, and reserve any additional authorization to a separate written agreement. §§3(e–f) require separate API registration/credentials and prior written approval for each End Customer if the service is an Aggregator, and require a customer list.
+- §1 defines `Aggregator` broadly to include a User who supplies Oura data or derived data to a third party for that party's service. Section 2(b) separately requires written terms binding any third-party AI provider to protections no less protective than the Agreement. Whether these provisions apply to the planned user-directed ChatGPT flow, and how, is unresolved.
 - §3(a) defines the agreement's “MCP Server” as infrastructure operated by Oura. The connector's custom MCP endpoint is not that Oura-operated server under the wording of §3(a).
 
-The product plan calls for an Oura API → custom connector MCP → ChatGPT flow. Reading that path as covered by §4(d)'s API-to-AI restriction is our inference from the published text, not a legal conclusion. Project gate: do not run a real-data test while this route is unresolved; ask Oura whether this route is permitted and whether the Oura-operated MCP path is required. The separate question of whether the connector meets the Agreement's Aggregator definition also remains open; if it does, §§2(c–d) and 3(e–f) state additional restrictions and steps. This runbook does not assume that user consent overrides those terms or create an approval requirement from the uncertainty alone.
+The product plan calls for an Oura API → custom connector MCP → ChatGPT flow. Reading that path as covered by §4(d)'s API-to-AI restriction is our inference from the published text, not a legal conclusion. Switching to direct Oura MCP → ChatGPT or adding an Oura MCP → custom adapter → ChatGPT hop does not resolve the Aggregator and downstream-terms questions or establish that the planned tools and normalization are supported. Project gate: do not run a real-data test while the route is unresolved; ask Oura which path is permitted, what technical contract applies, and whether written exceptions or customer-level approvals are required. This runbook does not assume that user consent overrides those terms or create an approval requirement from the uncertainty alone.
 
-**Unsent clarification draft — do not send from this repository:**
+**Unsent Oura clarification draft — do not send from this repository:**
 
-> Subject: Clarification on Oura API and MCP Agreement §§2 and 4 for a user-directed MCP integration
+> Subject: Oura-operated MCP access and permitted ChatGPT connector under the 2026 API and MCP Agreement
 >
-> We are evaluating a connector in which an individual Oura user authorizes our registered application through Oura's server-side OAuth flow. Our remote MCP server would fetch that user's data on demand from the Oura API and return only the requested result to that same user through ChatGPT. We do not plan to retain health payloads, train/evaluate models with Oura data, or use the data for other customers.
+> We are evaluating a user-directed ChatGPT connector. The current plan uses Oura API → our remote MCP server → ChatGPT, but §4(d) appears to require a non-Aggregator's LLM use to go through Oura's MCP Server. We have not connected to either Oura service or used real user data.
 >
-> Could you clarify whether this API → our custom MCP server → ChatGPT flow is permitted under §4(d), given §2(a)(i)'s description of processing through an AI Platform? Does §4(d) require use of the MCP Server operated by Oura, or is there a permitted API route or written exception for this flow? Also, would our service be an “Aggregator” under §2(c–d), and if so, do §§3(e–f) require separate Oura API registrations/credentials and prior approval for each individual end customer? Please point us to the applicable registration, approval, and consent requirements before we test with real user data.
+> Could you provide the official endpoint and documentation for the Oura-operated MCP Server, its developer eligibility/registration and approval process, supported transport and OAuth/resource-audience requirements, and whether ChatGPT is an allowed MCP Client? Please also provide its tool catalog and schemas, scopes/consent model, pagination and history limits, refresh/revocation behavior, and a reviewer/demo path that does not require real user health data. We need to determine whether its capabilities support `get_daily_metrics` for at least 30 days and our planned sleep, workout, and heart-rate tools.
+>
+> We are considering three routes: (1) Oura API → our MCP server → ChatGPT; (2) Oura MCP → ChatGPT directly; and (3) Oura MCP → our MCP adapter → ChatGPT, where the adapter would return compact normalized results. Please confirm which route(s), if any, are permitted. In particular, may the third route normalize/aggregate and forward Oura MCP data to ChatGPT? Would our service be an `Aggregator` under §1, including when a user initiates access only for themselves? Does §2(b)'s downstream written-terms requirement apply to ChatGPT in this flow, and what separate written agreement, per-customer registration/approval, or End Customer records would §§2(c–d) and 3(e–f) require?
+>
+> Please identify the governing technical/contract documents or written approval path. We are not requesting or including credentials, tokens, or health data in this inquiry.
 
-This text is only prepared for review. No email, support case, or application was submitted.
+This text is only prepared for review. No email, support case, or application was submitted. A response from Oura is the next external gate; public search results alone do not establish service availability or unavailability.
 
 ## External conditions before a permitted real-data test
 
-- The team resolves the terms question and documents the permitted route before a real-data test; if the route is not permitted, stop and change the architecture only after a separate product decision.
+- Oura provides the MCP access package and written clarification requested in [ADR 0003](../adr/0003-oura-operated-mcp-route.md); the team documents a permitted route and its tool/history fit before a real-data test. If the route is not permitted or cannot meet product criteria, stop and change the architecture only after a separate product decision.
 - Oura developer application is registered with the exact callback and has active `daily` access; the secret is available only to the runtime secret manager.
 - Any current Oura application user limit or review/approval requirement is checked in the newest developer portal; the legacy ten-user claim is not treated as current until verified.
 - Auth0 tenant is configured with resource/issuer settings and the ChatGPT callback/client-registration flow has passed the gates in ADR 0002.

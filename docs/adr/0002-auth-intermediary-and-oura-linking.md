@@ -5,6 +5,8 @@
 - **Decision owner:** project reviewer; prepared by the T2 implementer for review.
 - **Scope:** select the hosted MCP OAuth issuer to evaluate, specify a separate Oura connection, and record protocol and terms gates. No auth runtime or external account was configured.
 
+**Follow-up:** public documentation for the Oura-operated MCP route and its fit with the four project tools is unresolved; see [ADR 0003](0003-oura-operated-mcp-route.md). Auth0's protocol candidacy does not resolve Oura's terms or authorize a data route.
+
 ## Decision
 
 Use **Auth0 Auth for MCP as the first candidate for a short integration spike**, subject to the gates below. It is the most direct hosted option in the reviewed documentation: Auth0 documents MCP discovery and client registration, API-scoped tokens, a `resource` compatibility profile, and a setting to return authorization-response `iss`. Auth0's own docs still do not establish every ChatGPT exchange behavior or a complete Oura connection, so this is a candidate, not a compatibility claim.
@@ -47,7 +49,7 @@ The following are not proven by this document review and must be checked in a di
 4. Verify the authorization response `iss` exactly matches discovery for both success and error callbacks. OpenAI requires an `iss` query parameter on every success and error response before using its stable callback. Otherwise copy the callback-ID-specific production URI from the ChatGPT MCP management page.
 5. Verify the link app is a separate first-party Regular Web Application with its own exact callback, secret kept server-side, and ID token validated for exact issuer, audience, signature, expiry, and nonce. Verify PKCE S256, token subject stability across the ChatGPT client and link app, scope enforcement, reconnect, account isolation, and disconnect/revocation. Do not expose token bodies or health data in test logs.
 6. Verify stale Oura callbacks and refresh responses cannot restore a disconnected connection or overwrite a relink: transactions bind the authenticated `(issuer, subject)`, session ID, and link generation; credential writes compare-and-swap both link generation and token version. Include refresh-vs-disconnect and refresh-vs-relink race cases.
-7. Independently establish a permitted Oura data route before any real-data test. The current Oura API and MCP Agreement includes a direct Oura API → AI Platform restriction; see the terms issue and unsent clarification draft in [the runbook](../runbooks/auth0-oura-linking.md#oura-terms-review-required-before-real-data-testing).
+7. Independently establish a permitted Oura data route before any real-data test. The current Agreement's applicability to each candidate route, Aggregator classification, and downstream ChatGPT terms remain unresolved; see [ADR 0003](0003-oura-operated-mcp-route.md) and the unsent clarification in [the runbook](../runbooks/auth0-oura-linking.md#oura-terms-review-required-before-real-data-testing).
 
 Only after gates 1–6 pass can Auth0 be called MCP-compatible and the account-link mechanics considered tested. Oura OAuth mechanics and legal/data-route conditions are separate gates; success on the Auth0 connection alone does not clear them.
 
