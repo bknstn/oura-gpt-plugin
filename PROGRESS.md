@@ -8,7 +8,7 @@
 
 | Задача | Состояние | Ревью |
 | --- | --- | --- |
-| T1 | queued | — |
+| T1 | in_progress | — |
 | T2 | queued | — |
 | T3 | queued | — |
 | T4 | queued | — |
@@ -24,6 +24,15 @@
 - Начальная проверка документации: [OpenAI MCP auth](https://developers.openai.com/plugins/build/auth). Прямой Oura OAuth из исходного плана пока не подтверждён; T1 должна проверить весь контракт, включая MCP token passthrough/resource/audience.
 - Внешние OAuth/ChatGPT/deploy проверки ещё не выполнялись. Credentials, домен, auth-provider и reviewer account в репозитории не представлены.
 - Временные файлы на этапе планирования не создавались.
+
+### Текущая итерация T1 — документация и архитектурное решение
+
+- Состояние: `in_progress`.
+- Исполнитель: GPT 6 Luna (`gpt-6-luna`), reasoning effort `xhigh`.
+- Перед стартом: прочитаны `AGENTS.md`, `TASKS.md`, `PROGRESS.md`, исходный план; `git status --short` чистый; HEAD `56789b3`; незакоммиченного diff нет.
+- Выбранный следующий шаг: сверить актуальные официальные документы OpenAI, Oura и MCP по OAuth, PKCE/discovery, resource/audience, token passthrough, scopes и reviewer access; затем записать ADR со ссылками и датой проверки.
+- Проверки на этом checkpoint ещё не запускались; локальный skeleton не создан.
+- Известные ограничения: доступов к Oura application, ChatGPT reviewer flow, домену и credentials нет; реальные OAuth/ChatGPT проверки впереди.
 
 ## Журнал итераций и ревью
 
