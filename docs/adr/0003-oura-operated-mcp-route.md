@@ -33,7 +33,7 @@ The product plan and `TASKS.md` require four project tools: `get_daily_metrics`,
 
 ## External blocker and next step
 
-The blocker is an Oura decision and access package, not a local code gap. Before any Oura client, auth integration, deployment, or real-data request, ask Oura for a written response covering:
+The blocker is an Oura decision and access package, not a local code gap. The official [Partners & Resellers page](https://organizations.ouraring.com/solutions/partners-resellers) advertises Oura API partner support and links to this [contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers). Use it to request routing to the developer/MCP team. The page does not confirm that this is a dedicated MCP channel or guarantee routing; no inquiry has been sent. Before any Oura client, auth integration, deployment, or real-data request, ask Oura for a written response covering:
 
 1. Whether a third-party developer can use the Oura-operated MCP Server; the eligibility, application/registration, approval, and pricing process; the official endpoint and docs; supported transport and OAuth/resource-audience requirements; and whether ChatGPT is an allowed MCP Client.
 2. The published tool list and input/output schemas, scopes or consent grants, pagination and available-history limits, and refresh/revocation behavior. Confirm whether the available tools can support the four project tools, including at least 30 days for `get_daily_metrics` and the planned sleep, workout, and heart-rate access.
@@ -48,5 +48,6 @@ If Oura cannot document a permitted route and required data capabilities, return
 - Oura, [The Oura API](https://support.ouraring.com/hc/en-us/articles/4415266939155-The-Oura-API), updated 2026-10-01: API application and current developer-portal routing.
 - Oura, [OAuth 2.0 authentication](https://cloud.ouraring.com/docs/authentication): API OAuth scopes and flows; treated as API documentation, not MCP scope evidence.
 - Oura, [new developer portal](https://developer.ouraring.com/applications): sign-in required to view application management; account-gated content was not inspected.
+- Oura, [Partners & Resellers](https://organizations.ouraring.com/solutions/partners-resellers) and its [contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers): public channel marketed for partner/Oura API inquiries; using it to request developer/MCP routing is a proposed contact path, not confirmation of dedicated MCP support.
 - OpenAI, [Add custom MCP server](https://developers.openai.com/api/docs/guides/custom-mcp-server): ChatGPT custom remote MCP setup and generic authentication/transport options.
 - OpenAI, [MCP servers](https://developers.openai.com/api/docs/guides/tools-connectors-mcp): generic remote MCP support and trust/approval considerations.
