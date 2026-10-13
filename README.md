@@ -38,6 +38,6 @@ The sole tool, `get_synthetic_sleep_demo`, returns an explicitly synthetic recor
 
 ## Authentication decision and continuation
 
-See [ADR 0001](docs/adr/0001-oauth-boundary.md) for the verified OAuth boundary, Oura scopes, reviewer requirements, and the exact external checks that remain. Directly passing an Oura API token as the MCP request token is not permitted by the current MCP security contract. T2 must select and validate an authorization intermediary before any user-data tool is implemented.
+See [ADR 0001](docs/adr/0001-oauth-boundary.md) for the OAuth token boundary and [ADR 0002](docs/adr/0002-auth-intermediary-and-oura-linking.md) for the conditional Auth0 candidate, separate Oura account-link design, and verification gates. Directly passing an Oura API token as the MCP request token is not permitted by the current MCP security contract. The candidate is not verified, and Oura's current API/MCP terms leave the planned API-to-ChatGPT data route unresolved; see the [preparation runbook](docs/runbooks/auth0-oura-linking.md).
 
-No Oura application credentials, user health payloads, OAuth tokens, or ChatGPT reviewer credentials belong in this repository. External OAuth, ChatGPT, and reviewer checks are not represented as completed by local smoke success.
+No Oura application credentials, user health payloads, OAuth tokens, or ChatGPT reviewer credentials belong in this repository. External OAuth, ChatGPT, and reviewer checks are not represented as completed by local smoke success. No real Oura data should be used until the Oura terms route and OAuth compatibility gates in ADR 0002 are resolved.

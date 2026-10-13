@@ -4,6 +4,8 @@
 - **Checked:** 2026-10-13 (Europe/Warsaw).
 - **Decision owner:** project reviewer; this ADR is prepared by the T1 implementer for review.
 
+**T2 follow-up:** this ADR decides the MCP/Oura token boundary, not whether the proposed Oura API → custom MCP → ChatGPT data route is permitted by Oura's current terms. See [ADR 0002](0002-auth-intermediary-and-oura-linking.md) and the [linking runbook](../runbooks/auth0-oura-linking.md) for the Auth0 candidate, account-link plan, and the unresolved Oura API/MCP Agreement question.
+
 ## Context
 
 The plan proposes that ChatGPT obtain an Oura token and send it to the MCP server, which would then call Oura. The current published MCP authorization contract (`2026-07-28`) requires the MCP endpoint to be a protected resource: the client sends the canonical MCP resource URI during authorization and token requests, and the MCP server validates that each incoming token was issued for that resource. MCP security guidance explicitly forbids accepting a token issued for another service and forwarding it unchanged to an upstream API.

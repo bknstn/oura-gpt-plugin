@@ -3,13 +3,13 @@
 **Обновлено:** 2026-10-13 (Europe/Warsaw).  
 **Исполнитель:** `gpt-6-luna`, reasoning `xhigh`.  
 **Ревьюер:** основной агент текущего чата.  
-**Текущая задача:** T1 принята; следующая — T2 (ещё не запущена).
-**Следующий шаг:** по следующему поручению «продолжи по PROGRESS.md» поручить Luna xhigh первую итерацию T2: выбрать минимальный готовый OAuth intermediary по контракту ADR, подготовить схему account linking и конфигурацию Oura application/callback. До получения необходимых внешних доступов не объявлять реальный connect/Oura-сценарий проверенным.
+**Текущая задача:** T2, первая итерация: выбор OAuth intermediary и подготовка account linking.
+**Следующий шаг:** основной агент ревьюит ADR 0002, runbook и официальные источники, затем сохраняет решение. Исполнитель не начинает следующую T2-итерацию до дальнейшего поручения. Реальный connect/Oura-сценарий не проверен; перед использованием реальных данных нужно разрешить контрактный вопрос Oura и пройти OAuth gates.
 
 | Задача | Состояние | Ревью |
 | --- | --- | --- |
 | T1 | done | принято основным агентом, 2026-10-13 |
-| T2 | queued | — |
+| T2 | needs_review | первая документационная итерация, provider candidate + linking runbook |
 | T3 | queued | — |
 | T4 | queued | — |
 | T5 | queued | — |
@@ -18,6 +18,16 @@
 
 ## Активная точка восстановления
 
+- 2026-10-13, старт первой итерации T2 по поручению «Продолжи по PROGRESS.md»: прочитаны `AGENTS.md`, `TASKS.md`, журнал, ADR, README и каркас; сверены Git status/log/diff. Baseline — `dfb6127`, рабочее дерево до записи старта чистое. Фактические параметры нового исполнителя: `gpt-6-luna`, `reasoning_effort=xhigh`, один исполнитель текущего чата; основной агент — планировщик/ревьюер. Ближайший шаг — документационно проверенный выбор готового intermediary и воспроизводимые настройки/linking flow. Деплой, расходы, создание внешних аккаунтов и реальные OAuth проверки в эту итерацию не входят.
+
+- 2026-10-13, первая итерация T2 подготовлена к ревью: [ADR 0002](docs/adr/0002-auth-intermediary-and-oura-linking.md) условно выбирает Auth0 Auth for MCP для integration spike и сравнивает его со Stytch; [runbook](docs/runbooks/auth0-oura-linking.md) содержит placeholders, Auth0/Oura setup, отдельный account-link flow и несентированный запрос в Oura. Oura scopes разделены: `daily` для T2; `heartrate` и `workout` только для соответствующих инструментов полного MVP. В [ADR 0001](docs/adr/0001-oauth-boundary.md) и README добавлены ссылки на уточнение границ.
+- Текущая Oura support статья, обновлённая 2026-10-01, направляет создание новых приложений в `developer.ouraring.com`, а прежний Cloud портал оставляет для редактирования существующих приложений. Лимит 10 users на legacy Getting started странице отмечен как claim для проверки в новом портале, а не как подтверждённый текущий предел.
+- В официальном Oura API and MCP Agreement (effective 2026-06-08) §4(d) ограничивает LLM-путь non-Aggregator использованием Oura-operated MCP и запрещает применять Oura API для подачи данных AI Model/AI Platform; текущий API → custom MCP → ChatGPT план выглядит затронутым. Это inference о нашем planned flow, не юридическое заключение. §2(a)(i) и, при возможной классификации Aggregator, §§2(c–d), 3(e–f) требуют внешнего уточнения. По проектному gate real-data тесты отложены до прояснения допустимого маршрута; OAuth-техническая совместимость и договорная допустимость — независимые gates.
+- Проверенные официальные источники OpenAI, Auth0, Stytch и Oura перечислены в ADR 0002. Auth0 docs подтверждают настройки resource compatibility и authorization-response `iss`, но не доказывают exact ChatGPT code/token resource/audience flow, `iss` на error response, связь `sub` между clients или Oura single-use refresh handling в Token Vault. Поэтому Auth0 остаётся кандидатом, а не проверенным провайдером.
+- Проверки этой итерации: `git diff --check` — PASS после удаления двух trailing spaces; runtime tests не запускались, поскольку runtime code не менялся. Baseline `npm test` — PASS по независимому T1 review основного агента, не повторялся в этой docs-only итерации. Отдельные временные scripts/probes/scratch-файлы не создавались.
+- Ограничения: нет Auth0 tenant, Oura application credentials, публичного HTTPS домена или ChatGPT development connection; нет live проверки callback, resource/audience, PKCE, subject isolation, refresh rotation и downstream scope grants. Заявки и сообщения не отправлялись; аккаунты и deploy не создавались.
+- Статус первой итерации — `needs_review`; T2 не принята и критерии `TASKS.md` не менялись. Точный следующий шаг: основной агент ревьюит документы и источники, фиксирует результат отдельным коммитом; следующую T2 итерацию запускать только по дальнейшему поручению пользователя.
+
 - Исходный baseline: `56789b3`; до T1 рабочее дерево было чистым. Исполнитель — GPT 6 Luna (`gpt-6-luna`, `xhigh`), единственный автор реализации; основной агент выполняет ревью.
 - ADR [0001](docs/adr/0001-oauth-boundary.md) проверен по официальным источникам OpenAI, Oura, MCP и MCP TypeScript SDK, включая текущую опубликованную MCP authorization specification `2026-07-28`. Решение T1: не принимать и не передавать Oura access token как MCP token; до user-data tools выбрать посредника, выпускающего отдельный MCP-audience token. Конкретный provider не выбран; собственная auth-система не создавалась.
 - Каркас: TypeScript HTTP server с `/mcp` и `/health`, только loopback bind, проверки SDK для Host/Origin, один synthetic-only tool `get_synthetic_sleep_demo`, конфигурация только `HOST`/`PORT` без секретов. README описывает запуск и границы.
@@ -25,8 +35,8 @@
 - Выполненные проверки, все успешны: `npm run build`; `npm run typecheck`; `npm test`; `npm audit --audit-level=moderate` (`found 0 vulnerabilities`). Smoke запускает локальный сервер на ephemeral loopback port, проверяет health, Host/Origin rejection (403), отказ `HOST=0.0.0.0`, legacy initialize и pinned `2026-07-28` discovery с проверкой protocol era, затем вызывает синтетический tool настоящим SDK client.
 - Подтверждено только локальной проверкой и документацией. Не проведены: настройка/проверка выбранного OAuth intermediary, Oura app authorization и scopes, ChatGPT connection/callback, refresh concurrency и account isolation, HTTPS deployment, reviewer access/demo. Credentials, реальные health payloads, токены и публичный домен не использовались; reviewer path с синтетическими upstream данными требует реального подтверждения.
 - Cleanup: отдельные временные скрипты, probes или scratch-файлы не создавались. `scripts/protocol-smoke.mjs` — постоянный deliverable; `dist/` и `node_modules/` — игнорируемые build/dependency артефакты.
-- T1 принята по границе `TASKS.md`: документация + локальный каркас. Это не подтверждение реального OAuth/ChatGPT подключения. T2–T5 ещё не запущены.
-- При возобновлении: сверить `git status --short` и `git log`, прочитать ADR, поднять исполнителя `gpt-6-luna`/`xhigh` для T2. Ближайший независимый шаг — сравнить готовые auth-варианты с MCP контрактом и подготовить конкретную конфигурацию/linking flow; затем указать необходимые Oura application settings, provider, callback/domain и способ внесения secrets вне чата/Git.
+- T1 принята по границе `TASKS.md`: документация + локальный каркас. Это не подтверждение реального OAuth/ChatGPT подключения. Первая итерация T2 запущена; T3–T5 ещё не запущены.
+- При следующем возобновлении: сверить `git status --short` и `git log`; сначала завершить ревью T2 первой итерации `needs_review`. После ревью следующую итерацию T2 запускать только по дальнейшему поручению пользователя; T3–T5 остаются queued.
 
 ## Ревью T1 — 2026-10-13
 

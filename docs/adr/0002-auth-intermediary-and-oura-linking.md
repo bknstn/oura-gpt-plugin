@@ -1,0 +1,77 @@
+# ADR 0002: Hosted OAuth candidate and Oura account linking
+
+- **Status:** Auth0 is a candidate for a documentation-led integration spike only; no provider is verified or approved for real-data use.
+- **Checked:** 2026-10-13 (Europe/Warsaw).
+- **Decision owner:** project reviewer; prepared by the T2 implementer for review.
+- **Scope:** select the hosted MCP OAuth issuer to evaluate, specify a separate Oura connection, and record protocol and terms gates. No auth runtime or external account was configured.
+
+## Decision
+
+Use **Auth0 Auth for MCP as the first candidate for a short integration spike**, subject to the gates below. It is the most direct hosted option in the reviewed documentation: Auth0 documents MCP discovery and client registration, API-scoped tokens, a `resource` compatibility profile, and a setting to return authorization-response `iss`. Auth0's own docs still do not establish every ChatGPT exchange behavior or a complete Oura connection, so this is a candidate, not a compatibility claim.
+
+For the first spike, test a canonical protected resource of `https://<PUBLIC_MCP_HOST>/mcp`. Configure the Auth0 API identifier to that same absolute URI and the tenant's Resource Parameter Compatibility Profile so an incoming RFC 8707 `resource` value determines the issued token audience. Enable **Include Issuer in Authorization Responses**. The MCP server must validate the token signature, exact issuer, exact resource audience, expiry, and its own app-defined permission on every call.
+
+Keep MCP permission scopes separate from Oura OAuth scopes. The first tool's proposed MCP permission is `oura:daily.read`; it is an authorization-server permission, not an Oura scope. The Oura OAuth connection requests only `daily` for T2. The full planned MVP would request `daily heartrate workout` only when the corresponding tools are being implemented. It does not need `email`, `personal`, `tag`, `session`, or `spo2`.
+
+Do not use Auth0 Token Vault for Oura by assumption. Auth0 documents that its Token Vault refresh-token-exchange path does not support refresh-token rotation. Oura documents that each refresh token is single-use and returns a replacement. The Auth0 statement does not establish whether Auth0 can or cannot handle Oura's upstream rotation; the reviewed docs do not establish Oura connector support or safe replacement-token handling. Until that is documented and live-tested, the candidate design owns a separate Oura OAuth connection and persists its tokens in an approved managed encrypted store. This is storage of credentials only; no health-data history is stored. A refresh must be single-flight per linked identity and replace the stored refresh token only with the successful response's new token.
+
+## Provider comparison
+
+| Candidate | What current official docs establish | Gap for this connector | Decision |
+| --- | --- | --- | --- |
+| OpenAI-hosted ChatGPT OAuth | ChatGPT is the MCP OAuth client. OpenAI requires protected-resource and authorization-server discovery, authorization-code + PKCE S256, exact `resource` propagation to authorization and token requests, a token audience bound to that resource, and RFC 9207 `iss` checks. | OpenAI is not the connector's authorization server and does not establish a hosted Oura account store. | Protocol contract only; not an intermediary candidate. |
+| **Auth0 Auth for MCP** | Auth0 documents MCP discovery/client registration, the resource compatibility profile mapping `resource` to access-token audience, and a separate setting to include authorization-response `iss`. DCR-created third-party clients require PKCE; Auth0 also documents CIMD support. | Documentation does not prove ChatGPT's exact authorization-code token exchange carries the resource into `aud`, nor that `iss` is present on both success and error responses. Strict third-party apps do not support OIDC scopes, ID tokens, UserInfo, or `id_token_hint`. Oura Token Vault support and single-use refresh handling are unproven. | **First candidate for a gated integration spike.** |
+| Stytch Connected Apps | Stytch documents an OAuth/OIDC authorization-server product, MCP guide, DCR, CIMD, and PKCE. Its guide requires an application-hosted authorization page/component. | The current MCP example validates audience as the Stytch project ID and does not establish per-MCP-resource `resource` echo/audience binding or RFC 9207 authorization-response `iss`. A Stytch implementation also requires hosting the consent page. | Not selected unless documentation or a live spike closes the resource and issuer gaps. |
+
+The provider choice does not change the T1 token boundary: an Oura-issued API token is never accepted as the MCP bearer token and is never sent to ChatGPT. The MCP access token and Oura access/refresh tokens are separate credentials for separate audiences.
+
+## Account-linking design
+
+1. A user opens a minimal connector link page at `https://<PUBLIC_MCP_HOST>/connect/oura`. It uses a separate first-party Auth0 web client to authenticate the user in the same Auth0 tenant as MCP. The page only links or disconnects Oura; it is not a dashboard.
+2. The connector identifies the user only by the validated pair `(issuer, subject)` from Auth0. It does not associate accounts by email, display name, an MCP client ID, or a user-supplied tool argument.
+3. The connector creates a short-lived, single-use OAuth transaction bound server-side to `(issuer, subject)`, a cryptographically random `state`, and the PKCE verifier. It redirects the browser to Oura's server-side authorization-code flow.
+4. The Oura callback validates and consumes `state`, handles `access_denied` and malformed callbacks, then exchanges the code at Oura's token endpoint with the matching `redirect_uri`, Oura client ID/secret, and PKCE verifier. It never returns Oura tokens in a browser page or MCP response.
+5. Store the Oura tokens in an encrypted credential record keyed by `(Auth0 issuer, Auth0 subject, provider=oura)`. Use a managed encrypted database/secret store with access restricted to the MCP service. Never use email as a key. Do not store health payloads. A disconnect removes the association and credentials and revokes the Oura token where supported.
+6. On MCP calls, verify the independent Auth0 token and resolve its `(issuer, subject)` to exactly one Oura credential record. Missing, revoked, mismatched, or insufficient access fails closed. Never accept an account selector from a tool argument.
+7. On Oura token refresh, serialize concurrent refreshes per linked identity and atomically persist the replacement refresh token before allowing later requests to use it. Because Oura invalidates a refresh token when used, a crash after upstream rotation but before persistence can require a fresh Oura authorization; do not retry the prior token as though it were reusable.
+
+The first-party link-page login and the ChatGPT-issued MCP token must be proven to resolve to the same Auth0 `(issuer, subject)` in the spike. Auth0 documents that third-party MCP clients do not get OIDC ID tokens or UserInfo, so the link flow must not depend on those features for the MCP client. The first-party page may use a separate, pre-registered web client; keep its own callback and OIDC configuration distinct from ChatGPT's callback.
+
+## Gates before calling the provider compatible
+
+The following are not proven by this document review and must be checked in a disposable Auth0 tenant and a ChatGPT development connection before real Oura data is considered:
+
+1. Fetch Auth0 discovery and verify exact `issuer`, authorization/token endpoints, `code_challenge_methods_supported` includes `S256`, and the advertised client registration/authentication methods match the selected CIMD or DCR path.
+2. Confirm the registered client path succeeds with ChatGPT. Prefer CIMD if the Auth0 tenant supports the exact ChatGPT metadata and token-endpoint method; if using DCR, enable it only in the test tenant and apply a registration ACL/monitoring plan. Auth0 documents open DCR, which can create applications without a pre-existing token.
+3. Capture a sanitized authorization flow and verify ChatGPT sends the same canonical `resource` on authorization and code-to-token exchange, and Auth0 emits that exact value as the only expected API audience. Reject tokens with missing, additional, or mismatched audience.
+4. Verify the authorization response `iss` exactly matches discovery for both success and error callbacks. OpenAI requires an `iss` query parameter on every success and error response before using its stable callback. Otherwise copy the callback-ID-specific production URI from the ChatGPT MCP management page.
+5. Verify PKCE S256, token subject stability across the ChatGPT client and the first-party link-page client, expiry, scope enforcement, reconnect, account isolation, and disconnect/revocation. Do not expose token bodies or health data in test logs.
+6. Independently establish a permitted Oura data route before any real-data test. The current Oura API and MCP Agreement includes a direct Oura API → AI Platform restriction; see the terms issue and unsent clarification draft in [the runbook](../runbooks/auth0-oura-linking.md#oura-terms-review-required-before-real-data-testing).
+
+Only after gates 1–5 pass can Auth0 be called MCP-compatible. Oura OAuth mechanics and legal/data-route conditions are separate gates; success on the Auth0 connection alone does not clear them.
+
+## External conditions and current blockers
+
+- A public HTTPS MCP hostname and its canonical resource URI do not exist yet. The local scaffold is loopback-only.
+- An Auth0 developer tenant/admin and a ChatGPT development MCP connection are needed for the integration spike. None was created in this iteration.
+- An Oura API application is not registered. The expected callback placeholder is `https://<PUBLIC_MCP_HOST>/oauth/oura/callback`; it is a future connector route, not a live endpoint.
+- Oura's OAuth docs say authorization users can disable requested scopes, the callback `scope` parameter is deprecated and may be omitted, and the server-side token response lists access/refresh tokens but not a granted-scope field. The real connector must not treat requested scopes or callback `scope` as proof of grant; exercise the required endpoint and handle a missing-scope 403 without returning data.
+- **Terms route unresolved:** Oura's current API and MCP Agreement (§4(d), effective 2026-06-08) limits non-Aggregators' LLM use to access and processing through the contract-defined MCP Server, and separately prohibits using the Oura API to provide input or data to an AI Model or AI Platform. Section 3(a) defines that MCP Server as Oura-operated. The planned Oura API → custom MCP → ChatGPT flow appears to conflict with §4(d); that applicability is our inference from the published terms, not a legal conclusion. Section 2(a)(i) describes API processing through another technology, including an AI Platform, subject to the Agreement, so the interaction needs clarification. No real-data test is planned while the route is unresolved.
+- If the service is an `Aggregator` under the agreement, §§2(c–d) prohibit AI transfer/use except as authorized by a separate written agreement, and §§3(e–f) require per-End-Customer API registration/credentials, prior written approval, and customer records. Whether the connector meets that definition must be clarified; it is not assumed here. These terms are a scope question, not a new approval requirement inferred for this documentation iteration.
+
+## Sources checked 2026-10-13
+
+- OpenAI, [Authentication for plugins and remote MCP servers](https://developers.openai.com/plugins/build/auth): current client contract, metadata, resource, registration, `iss`, callback modes, token verification, and provider guidance.
+- OpenAI, [Build an MCP server](https://developers.openai.com/plugins/build/mcp-server): per-tool authentication and request authorization.
+- Auth0, [Auth for MCP overview](https://auth0.com/ai/docs/mcp/overview): hosted MCP discovery, client registration, resource-scoped tokens, and Token Vault product claims.
+- Auth0, [Enable Resource Parameter Compatibility Profile](https://auth0.com/ai/docs/mcp/guides/resource-param-compatibility-profile): resource-to-audience behavior, issuer response toggle, and documented flows.
+- Auth0, [Dynamic Client Registration](https://auth0.com/docs/get-started/applications/dynamic-client-registration): DCR availability, PKCE, public registration, API default permissions, and ACL.
+- Auth0, [Security Controls for Third-Party Applications](https://auth0.com/docs/get-started/applications/third-party-applications/security-controls): third-party app capabilities and OIDC limitations.
+- Auth0, [Refresh Token Exchange with Token Vault](https://auth0.com/docs/secure/call-apis-on-users-behalf/token-vault/refresh-token-exchange-with-token-vault): documented Token Vault refresh-token-rotation limitation.
+- Stytch, [MCP authorization overview](https://stytch.com/docs/connected-apps/guides/mcp-auth-overview): Connected Apps MCP discovery, client registration, PKCE example, audience validation, and hosted authorization UI.
+- Stytch, [Client types in Connected Apps](https://stytch.com/docs/connected-apps/oauth-learn-more/client-types): user-scoped client types and DCR/CIMD options.
+- Oura, [OAuth 2.0 authentication](https://cloud.ouraring.com/docs/authentication): endpoints, scopes, server-side flow, callback behavior, PKCE, and single-use refresh tokens.
+- Oura, [The Oura API](https://support.ouraring.com/hc/en-us/articles/4415266939155-The-Oura-API), updated 2026-10-01: new applications are created in the newest developer portal at `developer.ouraring.com`; the previous Cloud portal remains available to edit existing applications.
+- Oura, [Getting started](https://cloud.ouraring.com/docs/): legacy API docs describe a default ten-user limit and wider-release approval. Treat this as a legacy claim to verify in the current application portal, not as a confirmed current limit or approval process.
+- Oura, [API error handling](https://cloud.ouraring.com/docs/error-handling): missing-scope, invalid/used token, and redirect errors.
+- Oura, [API and MCP Agreement](https://cloud.ouraring.com/legal/api-agreement): current agreement effective 2026-06-08; §§2(a), 2(c–d), 3(a–f), 3(m), 4(a), 4(b–d), and 5(a–f).
