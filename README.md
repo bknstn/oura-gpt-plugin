@@ -32,7 +32,7 @@ npm run typecheck
 npm test
 ```
 
-`npm test` builds the server, starts it on an ephemeral loopback port, calls `/health`, then uses the MCP SDK client to list and call the synthetic tool through Streamable HTTP. It checks the `initialize` handshake and the current 2026-07-28 discovery flow, and closes both clients and the child server even on failure.
+`npm test` builds the server, starts it on an ephemeral loopback port, checks `/health`, confirms hostile `Host` and `Origin` headers receive 403, and confirms `HOST=0.0.0.0` fails before listening. MCP SDK clients then list and call the synthetic tool through both the legacy `initialize` handshake and a pinned 2026-07-28 discovery negotiation (pinning has no legacy fallback). The smoke closes clients and the child server even on failure.
 
 The sole tool, `get_synthetic_sleep_demo`, returns an explicitly synthetic record. It contains no personal information and is not an Oura fixture or evidence of a real Oura integration. The server uses the SDK's localhost Host and Origin checks to reduce DNS-rebinding risk. It has no OAuth, upstream API client, or production bind mode.
 

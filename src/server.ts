@@ -107,7 +107,14 @@ export function createAppServer(host = process.env.HOST ?? "127.0.0.1", port = N
 function start(): void {
   const host = process.env.HOST ?? "127.0.0.1";
   const port = Number(process.env.PORT ?? "8787");
-  const server = createAppServer(host, port);
+  let server: Server;
+  try {
+    server = createAppServer(host, port);
+  } catch {
+    console.error("[server] startup failed", "INVALID_CONFIGURATION");
+    process.exitCode = 1;
+    return;
+  }
 
   server.on("error", (error: NodeJS.ErrnoException) => {
     console.error("[server] startup failed", error.code ?? error.name);
