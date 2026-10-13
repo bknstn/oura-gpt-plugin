@@ -3,77 +3,42 @@
 **Обновлено:** 2026-10-13 (Europe/Warsaw).  
 **Исполнитель:** `gpt-6-luna`, reasoning `xhigh`.  
 **Ревьюер:** основной агент текущего чата.  
-**Текущая задача:** T1.  
-**Следующий шаг:** запустить финальные build/typecheck/protocol smoke/audit после добавления негативных проверок и pinned modern discovery; затем зафиксировать T1 как `needs_review`. Реализация T2–T5 в этом поручении пока не запускается.
+**Текущая задача:** T1 — архитектура и каркас.
+**Следующий шаг:** ревьюер проверяет T1 и фиксирует решение. До отдельного поручения T2–T5 не запускать.
 
 | Задача | Состояние | Ревью |
 | --- | --- | --- |
-| T1 | in_progress | — |
+| T1 | needs_review | ожидается |
 | T2 | queued | — |
 | T3 | queued | — |
 | T4 | queued | — |
 | T5 | queued | — |
 
-Состояния: `queued`, `in_progress`, `needs_review`, `blocked`, `done`. `done` выставляет ревьюер. Состояние после внезапного прерывания уточняется по Git и diff.
+Состояния: `queued`, `in_progress`, `needs_review`, `blocked`, `done`. `done` выставляет только ревьюер.
 
 ## Активная точка восстановления
 
-- Репозиторий первоначально содержал только незакоммиченный `oura-ai-connector-mvp.md`, реализации нет.
-- Пользователь подтвердил: подготовить очередь и начать первую задачу на Luna xhigh с ревью основного агента.
-- Созданы постоянные `AGENTS.md`, `TASKS.md`, `PROGRESS.md`; исходный план сохранён без изменений.
-- ADR 0001 проверен по текущей опубликованной MCP auth specification `2026-07-28` и актуальным официальным OpenAI/Oura docs: прямой Oura OAuth отклонён из-за требования MCP audience-bound token и запрета token passthrough.
-- Внешние OAuth/ChatGPT/deploy проверки ещё не выполнялись. Credentials, домен, auth-provider и reviewer account в репозитории не представлены.
-- Временные файлы на этапе планирования не создавались.
+- Исходный baseline: `56789b3`; до T1 рабочее дерево было чистым. Исполнитель — GPT 6 Luna (`gpt-6-luna`, `xhigh`), единственный автор реализации; основной агент выполняет ревью.
+- ADR [0001](docs/adr/0001-oauth-boundary.md) проверен по официальным источникам OpenAI, Oura, MCP и MCP TypeScript SDK, включая текущую опубликованную MCP authorization specification `2026-07-28`. Решение T1: не принимать и не передавать Oura access token как MCP token; до user-data tools выбрать посредника, выпускающего отдельный MCP-audience token. Конкретный provider не выбран; собственная auth-система не создавалась.
+- Каркас: TypeScript HTTP server с `/mcp` и `/health`, только loopback bind, проверки SDK для Host/Origin, один synthetic-only tool `get_synthetic_sleep_demo`, конфигурация только `HOST`/`PORT` без секретов. README описывает запуск и границы.
+- Зафиксированы точные версии и lockfile: MCP server/client `2.3.1`, Node adapter `2.1.1`, `tsx` `4.23.15` и остальные direct dependencies в `package.json`/`package-lock.json`.
+- Выполненные проверки, все успешны: `npm run build`; `npm run typecheck`; `npm test`; `npm audit --audit-level=moderate` (`found 0 vulnerabilities`). Smoke запускает локальный сервер на ephemeral loopback port, проверяет health, Host/Origin rejection (403), отказ `HOST=0.0.0.0`, legacy initialize и pinned `2026-07-28` discovery с проверкой protocol era, затем вызывает синтетический tool настоящим SDK client.
+- Подтверждено только локальной проверкой и документацией. Не проведены: настройка/проверка выбранного OAuth intermediary, Oura app authorization и scopes, ChatGPT connection/callback, refresh concurrency и account isolation, HTTPS deployment, reviewer access/demo. Credentials, реальные health payloads, токены и публичный домен не использовались; reviewer path с синтетическими upstream данными требует реального подтверждения.
+- Cleanup: отдельные временные скрипты, probes или scratch-файлы не создавались. `scripts/protocol-smoke.mjs` — постоянный deliverable; `dist/` и `node_modules/` — игнорируемые build/dependency артефакты.
+- Точный следующий шаг: ревьюеру проверить T1 diff и критерии в `TASKS.md`, затем внести решение отдельным checkpoint. В этом поручении T1 не отмечать `done`, T2–T5 не начинать.
 
-### Текущая итерация T1 — документация и архитектурное решение
+## Журнал T1
 
-- Состояние: `in_progress`.
-- Исполнитель: GPT 6 Luna (`gpt-6-luna`), reasoning effort `xhigh`.
-- Перед стартом: прочитаны `AGENTS.md`, `TASKS.md`, `PROGRESS.md`, исходный план; `git status --short` чистый; HEAD `56789b3`; незакоммиченного diff нет.
-- Выбранный следующий шаг: сверить актуальные официальные документы OpenAI, Oura и MCP по OAuth, PKCE/discovery, resource/audience, token passthrough, scopes и reviewer access; затем записать ADR со ссылками и датой проверки.
-- Документальная проверка завершена: прямой Oura bearer в MCP несовместим с обязательной audience boundary и запретом token passthrough; Oura PKCE/refresh/scopes подтверждены. ADR добавлен в `docs/adr/0001-oauth-boundary.md`.
-- Проверки кода ещё не запускались; локальный skeleton не создан.
-- Известные ограничения: доступов к Oura application, ChatGPT reviewer flow, домену и credentials нет; реальные OAuth/ChatGPT проверки впереди.
-- SDK API и версии проверены по официальной документации/release/source: `@modelcontextprotocol/server` и `client` 2.3.1, Node adapter 2.1.1; SDK требует Node.js >=20, локально доступен Node v22.22.2.
-- Реализован первый вариант loopback-only skeleton (`src/server.ts`), health endpoint, явно синтетический MCP tool, protocol smoke, README, `package.json` с точными прямыми версиями и `tsconfig.json`.
-- `npm install` прошёл через разрешённый сетевой запуск; создан `package-lock.json`, установлено 25 пакетов. Отчёт npm: 2 moderate advisories, подробности ещё не проверены.
-- `npm run build` прошёл; `npm run typecheck` прошёл.
-- `tsx` обновлён до exact `4.23.15`; lockfile обновлён. `npm install --save-dev --save-exact tsx@4.23.15` завершился с `found 0 vulnerabilities`.
-- Первые build/typecheck прошли до обновления зависимости; повторная проверка и протокольный smoke ещё впереди.
-- Точный следующий шаг: повторить build/typecheck и запустить протокольный smoke на ephemeral loopback port; затем проверить итоговый `npm audit`.
+- Сверены OpenAI требования к MCP OAuth/reviewer access, Oura PKCE/scopes/single-use refresh tokens, текущий MCP token audience и запрет token passthrough. Источники, даты и границы доказательств приведены в ADR.
+- Зафиксировано, что Oura docs не подтверждают поддержку MCP resource/audience/discovery; это неизвестность, а не вывод о невозможности. Будущему refresh нужны атомарная ротация и single-flight/concurrency control.
+- Добавлен local-only TypeScript MCP scaffold, pinned SDK/client dependencies, lockfile, `.env.example`, README и meaningful protocol smoke. Smoke-tool возвращает только явно синтетическую запись, не Oura fixture.
+- npm первоначально сообщил advisory в старой транзитивной цепочке `tsx@4.16.5`/`esbuild`; `tsx` обновлён до `4.23.15`, повторный audit — 0 vulnerabilities.
+- Последние implementation checkpoints перед передачей: `074ea66` (обновление `tsx`), `08e9971` (границы Host/Origin/bind и protocol-era smoke). Предшествующие ADR/scaffold checkpoints перечислены в `git log`.
 
-### Текущая итерация T1 — отрицательные локальные границы
+## История подготовки очереди
 
-- Состояние: `in_progress`.
-- Исполнитель: GPT 6 Luna (`gpt-6-luna`), reasoning effort `xhigh`.
-- Исходное состояние: HEAD `074ea66`, рабочее дерево чистое.
-- Выбранный следующий шаг: добавить в durable MCP smoke тесты, что hostile Host/Origin блокируются SDK-проверками и `HOST=0.0.0.0` не запускает локальный сервер; проверить protocol era через API клиента, чтобы точно зафиксировать, какой handshake/discovery прошёл.
-- Текущие проверки: build/typecheck пройдены до обновления `tsx`; финальный smoke после закрепления этих граничных проверок ещё не запускался.
-- Ограничения: только синтетический локальный протокол; OAuth, Oura, ChatGPT и reviewer flow не проверяются без внешней конфигурации/credentials.
-- Выполнено: startup с недопустимым HOST теперь завершается с безопасным кодом `INVALID_CONFIGURATION`; smoke проверяет чужие Host и Origin (ожидается 403), отказ `0.0.0.0`, legacy initialize и pinned `2026-07-28` discovery с assertion фактической protocol era.
-- Следующий шаг: финальные команды проверки; результаты ещё не известны.
+### 2026-10-13 — подготовка задач
 
-### Проверка актуальной редакции MCP authorization
-
-- По ссылке `/specification/latest/basic/authorization` подтверждена опубликованная редакция `2026-07-28`; в ADR заменены ссылки на прежнюю редакцию.
-- Уточнено: CIMD/pre-registration предпочтительны, DCR deprecated для backward compatibility; учитывается issuer `iss` и exact issuer validation.
-- Остаток: выбрать/проверить реального authorization intermediary и ChatGPT callback позже, в T2; provider пока не выбран.
-- Зависимости установлены, lockfile создан; npm сообщил о 2 moderate advisories.
-- Build и typecheck прошли. Audit связал обе moderate записи с `tsx@4.16.5` / `esbuild`; переход на `tsx@4.23.15` обновил lockfile, npm сообщил `found 0 vulnerabilities`.
-- Следующий шаг: повторить build/typecheck, запустить полный local smoke и повторить audit.
-
-### Журнал T1 — архитектурное решение по OAuth
-
-- Проверены первичные официальные источники OpenAI, Oura, MCP и MCP TypeScript SDK; ссылки и дата внесены в ADR.
-- Решение для ревью: не использовать direct OAuth из исходного плана; до инструментов пользовательских данных требуется выбранный authorization intermediary, выпускающий MCP-audience token отдельно от upstream Oura credentials. Поставщик ещё не выбран.
-- Зафиксированы будущие Oura scopes `daily`, `heartrate`, `workout`, reviewer demo с sample data, single-use refresh-token rotation, и внешние проверки, требующие credentials/домена/ChatGPT.
-- Проверки реализации пока не запускались. Следующий шаг — локальный skeleton без auth и Oura API.
-
-## Журнал итераций и ревью
-
-### 2026-10-13 — Подготовка очереди
-
-- Разбивка исходного плана на пять последовательных задач с критериями приёмки.
-- Зафиксированы исполнитель Luna xhigh, независимое ревью и checkpoint после каждого небольшого шага.
-- Проверки: прочитан исходный план; подтверждено, что репозиторий ещё не имеет коммитов. Программных проверок пока нет.
-- Дальше: сохранить baseline в Git и поручить T1 Luna. Ссылки на коммиты брать из `git log`; журнал входит в сам checkpoint-коммит и не требует самоссылки на его hash.
+- Исходный план разделён на пять последовательных задач с критериями приёмки; оригинал `oura-ai-connector-mvp.md` сохранён.
+- Зафиксированы исполнитель Luna xhigh, независимое ревью и checkpoint после небольших законченных шагов.
+- Перед началом T1 прочитаны `AGENTS.md`, `TASKS.md`, `PROGRESS.md` и исходный план; baseline commit — `56789b3`.
