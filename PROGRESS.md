@@ -37,8 +37,10 @@
 - SDK API и версии проверены по официальной документации/release/source: `@modelcontextprotocol/server` и `client` 2.3.1, Node adapter 2.1.1; SDK требует Node.js >=20, локально доступен Node v22.22.2.
 - Реализован первый вариант loopback-only skeleton (`src/server.ts`), health endpoint, явно синтетический MCP tool, protocol smoke, README, `package.json` с точными прямыми версиями и `tsconfig.json`.
 - `npm install` прошёл через разрешённый сетевой запуск; создан `package-lock.json`, установлено 25 пакетов. Отчёт npm: 2 moderate advisories, подробности ещё не проверены.
-- Build/typecheck/protocol smoke ещё не запускались.
-- Точный следующий шаг: исследовать advisory, затем выполнить build, typecheck и протокольный smoke, исправить обнаруженные проблемы.
+- `npm run build` прошёл; `npm run typecheck` прошёл.
+- `npm audit --json` выявил 2 moderate записи, обе из-за `tsx@4.16.5` → уязвимый `esbuild` (GHSA-67mh-4wv8-2f99); npm указывает исправленную `tsx@4.23.15`.
+- Протокольный smoke ещё не запускался.
+- Точный следующий шаг: обновить `tsx` до исправленной exact version, обновить lockfile, повторить audit/build/typecheck и запустить протокольный smoke.
 
 ### Проверка актуальной редакции MCP authorization
 
@@ -46,7 +48,8 @@
 - Уточнено: CIMD/pre-registration предпочтительны, DCR deprecated для backward compatibility; учитывается issuer `iss` и exact issuer validation.
 - Остаток: выбрать/проверить реального authorization intermediary и ChatGPT callback позже, в T2; provider пока не выбран.
 - Зависимости установлены, lockfile создан; npm сообщил о 2 moderate advisories.
-- Следующий шаг: проверить report advisories и выполнить build/typecheck/smoke.
+- Build и typecheck прошли. Audit связал обе moderate записи с `tsx@4.16.5` / `esbuild`; исправление доступно в `tsx@4.23.15`.
+- Следующий шаг: закрепить исправленный `tsx`, затем выполнить полный local smoke и повторный audit.
 
 ### Журнал T1 — архитектурное решение по OAuth
 
