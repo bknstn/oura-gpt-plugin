@@ -31,8 +31,17 @@
 - Исполнитель: GPT 6 Luna (`gpt-6-luna`), reasoning effort `xhigh`.
 - Перед стартом: прочитаны `AGENTS.md`, `TASKS.md`, `PROGRESS.md`, исходный план; `git status --short` чистый; HEAD `56789b3`; незакоммиченного diff нет.
 - Выбранный следующий шаг: сверить актуальные официальные документы OpenAI, Oura и MCP по OAuth, PKCE/discovery, resource/audience, token passthrough, scopes и reviewer access; затем записать ADR со ссылками и датой проверки.
-- Проверки на этом checkpoint ещё не запускались; локальный skeleton не создан.
+- Документальная проверка завершена: прямой Oura bearer в MCP несовместим с обязательной audience boundary и запретом token passthrough; Oura PKCE/refresh/scopes подтверждены. ADR добавлен в `docs/adr/0001-oauth-boundary.md`.
+- Проверки кода ещё не запускались; локальный skeleton не создан.
 - Известные ограничения: доступов к Oura application, ChatGPT reviewer flow, домену и credentials нет; реальные OAuth/ChatGPT проверки впереди.
+- Точный следующий шаг: проверить актуальный TypeScript SDK v2 API и зафиксировать точные зависимости, затем добавить loopback-only HTTP MCP skeleton, health endpoint, синтетический protocol smoke, README и команды dev/build/typecheck/test.
+
+### Журнал T1 — архитектурное решение по OAuth
+
+- Проверены первичные официальные источники OpenAI, Oura, MCP и MCP TypeScript SDK; ссылки и дата внесены в ADR.
+- Решение для ревью: не использовать direct OAuth из исходного плана; до инструментов пользовательских данных требуется выбранный authorization intermediary, выпускающий MCP-audience token отдельно от upstream Oura credentials. Поставщик ещё не выбран.
+- Зафиксированы будущие Oura scopes `daily`, `heartrate`, `workout`, reviewer demo с sample data, single-use refresh-token rotation, и внешние проверки, требующие credentials/домена/ChatGPT.
+- Проверки реализации пока не запускались. Следующий шаг — локальный skeleton без auth и Oura API.
 
 ## Журнал итераций и ревью
 
