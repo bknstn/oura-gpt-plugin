@@ -106,6 +106,8 @@ This text is only prepared for review. No email, support case, or application wa
 
 **Proposed contact channel, not sent:** Oura's [Partners & Resellers page](https://organizations.ouraring.com/solutions/partners-resellers) advertises partner support for the Oura API and links to its [Partners & Resellers contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers). After a separate instruction to make the external inquiry, use that form to ask Oura to route the clarification to its developer/MCP team. The public page does not identify a dedicated MCP support channel or guarantee that routing; this is only the most relevant documented public contact route found.
 
+For a short member-facing introduction, see the separate [Oura Member inquiry email draft](oura-member-inquiry-email.md). It is planned and unsent; the detailed technical checklist above remains internal.
+
 ## External conditions before a permitted real-data test
 
 - Oura confirms in writing which route is permitted; the team records that decision before implementation or real-data testing. If no route is permitted or the required tools/history are unavailable, stop for a product-owner architecture decision.
