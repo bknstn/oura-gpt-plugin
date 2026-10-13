@@ -5,7 +5,7 @@
 **Related decision:** [ADR 0002](../adr/0002-auth-intermediary-and-oura-linking.md).
 **Oura-operated MCP route:** [ADR 0003](../adr/0003-oura-operated-mcp-route.md).
 
-This runbook records the candidate setup for a future controlled integration spike. Do not use it to connect real Oura data until the Oura route in ADR 0003 is documented as permitted and the OAuth gates in ADR 0002 pass.
+This runbook records candidate setup steps for a future controlled integration spike. First obtain Oura's written confirmation of the selected data route. Auth0, our public MCP endpoint, and the account-link setup below apply only if we keep a custom ChatGPT MCP connector, including an Oura MCP adapter. The Oura API application and its credentials apply only if the approved route calls the Oura API. A direct Oura MCP → ChatGPT route would use Oura's endpoint and tools; it requires a separate product-owner decision because it changes tool ownership, outputs, and normalization. Do not configure route-specific resources before selecting a permitted route and passing the applicable gates.
 
 ## Values to fill outside Git
 
@@ -77,10 +77,10 @@ Oura's [current API and MCP Agreement](https://cloud.ouraring.com/legal/api-agre
 - §2(a)(i) describes authorized-purpose access through a Collaborator Application to the Oura API, including processing through another technology such as an AI Platform, subject to the Agreement and user consent.
 - §4(d) says a non-Aggregator's LLM use may access/process Oura data solely through the contract-defined MCP Server, and separately prohibits using the Oura API to provide input or data to an AI Model or AI Platform.
 - §§2(c–d) separately restrict an `Aggregator` to pass-through for End Customers, prohibit AI transfer/use, and reserve any additional authorization to a separate written agreement. §§3(e–f) require separate API registration/credentials and prior written approval for each End Customer if the service is an Aggregator, and require a customer list.
-- §1 defines `Aggregator` broadly to include a User who supplies Oura data or derived data to a third party for that party's service. Section 2(b) separately requires written terms binding any third-party AI provider to protections no less protective than the Agreement. Whether these provisions apply to the planned user-directed ChatGPT flow, and how, is unresolved.
+- Section 2(b) separately requires protective written terms for a downstream AI provider; the scope of `Aggregator` and its effects are summarized in [ADR 0003](../adr/0003-oura-operated-mcp-route.md).
 - §3(a) defines the agreement's “MCP Server” as infrastructure operated by Oura. The connector's custom MCP endpoint is not that Oura-operated server under the wording of §3(a).
 
-The product plan calls for an Oura API → custom connector MCP → ChatGPT flow. Reading that path as covered by §4(d)'s API-to-AI restriction is our inference from the published text, not a legal conclusion. Switching to direct Oura MCP → ChatGPT or adding an Oura MCP → custom adapter → ChatGPT hop does not resolve the Aggregator and downstream-terms questions or establish that the planned tools and normalization are supported. Project gate: do not run a real-data test while the route is unresolved; ask Oura which path is permitted, what technical contract applies, and whether written exceptions or customer-level approvals are required. This runbook does not assume that user consent overrides those terms or create an approval requirement from the uncertainty alone.
+The product plan calls for Oura API → custom MCP → ChatGPT. The three candidate routes and the §4(d) inference are assessed in [ADR 0003](../adr/0003-oura-operated-mcp-route.md). Do not test real data until Oura confirms a permitted route, its technical contract, and any applicable approvals. This runbook does not assume that user consent overrides the Agreement or turn uncertainty into an approval requirement.
 
 **Unsent Oura clarification draft — do not send from this repository:**
 
@@ -98,9 +98,8 @@ This text is only prepared for review. No email, support case, or application wa
 
 ## External conditions before a permitted real-data test
 
-- Oura provides the MCP access package and written clarification requested in [ADR 0003](../adr/0003-oura-operated-mcp-route.md); the team documents a permitted route and its tool/history fit before a real-data test. If the route is not permitted or cannot meet product criteria, stop and change the architecture only after a separate product decision.
-- Oura developer application is registered with the exact callback and has active `daily` access; the secret is available only to the runtime secret manager.
-- Any current Oura application user limit or review/approval requirement is checked in the newest developer portal; the legacy ten-user claim is not treated as current until verified.
-- Auth0 tenant is configured with resource/issuer settings and the ChatGPT callback/client-registration flow has passed the gates in ADR 0002.
-- A public HTTPS deployment and Auth0/Oura account-link route exist. No real health data is used against the current loopback-only server.
-- Account isolation, access-denied/partial-scope behavior, token refresh races, disconnect/revoke, and sanitized logging are tested before calling the vertical scenario complete.
+- Oura confirms in writing which route is permitted; the team records that decision before implementation or real-data testing. If no route is permitted or the required tools/history are unavailable, stop for a product-owner architecture decision.
+- **For either Oura MCP route:** obtain the endpoint, onboarding/approval conditions, protocol/auth contract, tool schemas, scopes/consent, history/pagination and refresh/revocation details, plus any supported reviewer/demo path. For direct Oura MCP → ChatGPT, also obtain product-owner approval for the product change described in ADR 0003.
+- **Only if the approved route calls the Oura API:** register an Oura API application, configure its exact callback, verify current app limits/review conditions in the newest developer portal, and place credentials in the runtime secret manager. Do not apply the legacy ten-user claim as current without verification.
+- **Only if we keep our own remote ChatGPT MCP connector:** pass the Auth0 resource/issuer/CIMD and ChatGPT callback gates in ADR 0002, and provide its public HTTPS endpoint and separate Oura-link route. Direct Oura MCP → ChatGPT does not use our Auth0/link-page setup.
+- Test the selected route's account isolation, denied/partial consent, refresh/revocation, and sanitized logging before calling the vertical scenario complete. The specific refresh test follows the selected upstream provider's documented token behavior.
