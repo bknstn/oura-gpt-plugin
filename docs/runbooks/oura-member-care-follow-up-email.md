@@ -2,7 +2,7 @@
 
 - **Status:** Prepared for review; the assistant has not sent it.
 - **Prepared:** 2026-10-20 (Europe/Warsaw).
-- **Email word count:** 95, including subject, greeting, and signature; source notes excluded.
+- **Email word count:** 84, including subject, greeting, and signature; source notes excluded.
 
 ## Copyable email
 
@@ -10,9 +10,9 @@ Subject: Follow-up: Oura data access for a ChatGPT plugin
 
 Hi Gladys,
 
-Thanks for checking this. Could you please forward my question to the person responsible for Oura API/developer partnerships or developer terms?
+Thanks for checking this. Could you please escalate this request internally to someone who can clarify how Section 4(d) of the [Oura API and MCP Agreement](https://cloud.ouraring.com/legal/api-agreement) applies to this specific use case?
 
-The current [Oura API and MCP Agreement](https://cloud.ouraring.com/legal/api-agreement), §4(d), appears to require Oura-operated MCP for LLM use. Could that team confirm in writing whether a user-authorized, read-only Oura API → our MCP → ChatGPT route is permitted, or whether I should use a supported Oura MCP path? If MCP is the supported path, how can a developer obtain access and its documentation?
+Could they confirm in writing whether a user-authorized, read-only Oura API → our MCP → ChatGPT route is permitted, or whether I should use a supported Oura MCP path? If the latter, how can a developer obtain access and documentation?
 
 Best,
 
