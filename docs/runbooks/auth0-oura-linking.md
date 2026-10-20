@@ -90,7 +90,9 @@ Oura's [current API and MCP Agreement](https://cloud.ouraring.com/legal/api-agre
 
 The product plan calls for Oura API → custom MCP → ChatGPT. The three candidate routes and the §4(d) inference are assessed in [ADR 0003](../adr/0003-oura-operated-mcp-route.md). Do not test real data until Oura confirms a permitted route, its technical contract, and any applicable approvals. This runbook does not assume that user consent overrides the Agreement or turn uncertainty into an approval requirement.
 
-**Unsent Oura clarification draft — do not send from this repository:**
+**Historical technical inquiry draft — body prepared 2026-10-13:**
+
+The assistant did not send this draft. The user later reported a related Member Care response, but its date, recipient, and outbound text are unknown; it cannot be established that this draft was sent. See the [follow-up draft](oura-member-care-follow-up-email.md) for the current evidence and provenance.
 
 > Subject: Oura-operated MCP access and permitted ChatGPT connector under the 2026 API and MCP Agreement
 >
@@ -102,11 +104,11 @@ The product plan calls for Oura API → custom MCP → ChatGPT. The three candid
 >
 > Please identify the governing technical/contract documents or written approval path. We are not requesting or including credentials, tokens, or health data in this inquiry.
 
-This text is only prepared for review. No email, support case, or application was submitted. A response from Oura is the next external gate; public search results alone do not establish service availability or unavailability.
+**Evidence update — 2026-10-20:** The user supplied the text of a related Member Care reply; only a summary is retained in the [follow-up draft](oura-member-care-follow-up-email.md). The response did not confirm this use case as approved or identify MCP access/approval documentation. The assistant did not send this draft; the reply cannot be linked to it, and the mailbox was not independently checked. This is inconclusive and establishes neither approval nor prohibition, MCP unavailability, nor escalation.
 
-**Proposed contact channel, not sent:** Oura's [Partners & Resellers page](https://organizations.ouraring.com/solutions/partners-resellers) advertises partner support for the Oura API and links to its [Partners & Resellers contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers). After a separate instruction to make the external inquiry, use that form to ask Oura to route the clarification to its developer/MCP team. The public page does not identify a dedicated MCP support channel or guarantee that routing; this is only the most relevant documented public contact route found.
+**Potential public contact route:** Oura's [Partners & Resellers page](https://organizations.ouraring.com/solutions/partners-resellers) advertises partner support for the Oura API and links to its [Partners & Resellers contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers). The user-provided reply does not identify how the related inquiry was sent. The assistant sent no message through this route. The page does not identify dedicated MCP support or guarantee routing to a developer/terms owner.
 
-For a short member-facing introduction, see the separate [Oura Member inquiry email draft](oura-member-inquiry-email.md). It is planned and unsent; the detailed technical checklist above remains internal.
+For the historical member-facing introduction, see the separate [Oura Member inquiry email draft](oura-member-inquiry-email.md); the assistant did not send it, and the user's report does not establish whether they sent this specific draft. The detailed technical checklist above remains internal. The new [Member Care follow-up draft](oura-member-care-follow-up-email.md) is also unsent.
 
 ## External conditions before a permitted real-data test
 

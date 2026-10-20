@@ -1,7 +1,7 @@
 # ADR 0003: Oura-operated MCP route and product fit
 
-- **Status:** unresolved external blocker; no Oura data route is approved for implementation or real-data testing.
-- **Checked:** 2026-10-13 (Europe/Warsaw).
+- **Status:** unresolved external blocker; no Oura data route is confirmed for implementation or real-data testing.
+- **Checked:** 2026-10-20 (Europe/Warsaw); initial public MCP review 2026-10-13.
 - **Decision owner:** project reviewer; prepared by the T2 implementer for review.
 - **Scope:** assess publicly documented Oura-operated MCP access and compare it with the four-tool ChatGPT connector plan. This ADR does not change `TASKS.md` acceptance criteria.
 
@@ -21,6 +21,10 @@ Oura's public API authentication documentation lists API OAuth scopes such as `d
 
 OpenAI Docs establishes that ChatGPT can be configured with a custom remote MCP server using OAuth and supported remote MCP transports. That is generic client capability only: it does not provide an Oura endpoint, make Oura authorization available, or resolve Oura's contractual conditions.
 
+## Member Care update — 2026-10-20
+
+The reviewer rechecked Oura's [Agreement](https://cloud.ouraring.com/legal/api-agreement) and [API support article](https://support.ouraring.com/hc/en-us/articles/4415266939155-The-Oura-API). The Agreement still defines its MCP Server as Oura-operated (§1) and restricts using the API to supply data to AI (§4(d)); this is contract text, not a ruling on this product. The user supplied the reply text; only a brief summary is retained in the [follow-up draft and evidence note](../runbooks/oura-member-care-follow-up-email.md), and the mailbox was not checked. The reply did not confirm the connector as approved or locate MCP onboarding/approval materials. Its exact date, recipient, and relation to earlier drafts are unknown. It establishes neither permission nor prohibition, MCP unavailability, or escalation.
+
 ## Architecture fit
 
 | Route | Current assessment |
@@ -33,7 +37,7 @@ The product plan and `TASKS.md` require four project tools: `get_daily_metrics`,
 
 ## External blocker and next step
 
-The blocker is an Oura decision and access package, not a local code gap. The official [Partners & Resellers page](https://organizations.ouraring.com/solutions/partners-resellers) advertises Oura API partner support and links to this [contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers). Use it to request routing to the developer/MCP team. The page does not confirm that this is a dedicated MCP channel or guarantee routing; no inquiry has been sent. Before any Oura client, auth integration, deployment, or real-data request, ask Oura for a written response covering:
+The blocker is an Oura decision and access package, not a local code gap. The official [Partners & Resellers page](https://organizations.ouraring.com/solutions/partners-resellers) advertises Oura API partner support and links to this [contact form](https://organizations.ouraring.com/contact?topic=PartnersAndResellers&utm_source=PartnersAndResellers). Use it to request routing to the developer/MCP terms owner. The page does not confirm dedicated MCP support or guarantee routing. The user has reported a related Member Care response, but the exact contact route is unknown; the assistant sent no message. See the dated update above and [follow-up draft](../runbooks/oura-member-care-follow-up-email.md). Before any Oura client, auth integration, deployment, or real-data request, obtain written clarification and the technical package covering:
 
 1. Whether a third-party developer can use the Oura-operated MCP Server; the eligibility, application/registration, approval, and pricing process; the official endpoint and docs; supported transport and OAuth/resource-audience requirements; and whether ChatGPT is an allowed MCP Client.
 2. The published tool list and input/output schemas, scopes or consent grants, pagination and available-history limits, and refresh/revocation behavior. Confirm whether the available tools can support the four project tools, including at least 30 days for `get_daily_metrics` and the planned sleep, workout, and heart-rate access.
@@ -42,7 +46,7 @@ The blocker is an Oura decision and access package, not a local code gap. The of
 
 If Oura cannot document a permitted route and required data capabilities, return to the product owner for a separate architecture decision. Do not silently replace the API route, weaken the four-tool/30-day criteria, or mark T2 complete.
 
-## Sources checked 2026-10-13
+## Sources checked 2026-10-13; Agreement and API support rechecked 2026-10-20
 
 - Oura, [API and MCP Agreement](https://cloud.ouraring.com/legal/api-agreement), effective 2026-06-08: §§1, 2(a–d), 3(a–f), 3(m), 4(d).
 - Oura, [The Oura API](https://support.ouraring.com/hc/en-us/articles/4415266939155-The-Oura-API), updated 2026-10-01: API application and current developer-portal routing.
