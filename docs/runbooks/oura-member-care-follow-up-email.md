@@ -2,7 +2,7 @@
 
 - **Status:** New reply draft prepared for review; the assistant has not sent it. Whether the user sent an earlier draft is unknown.
 - **Prepared:** 2026-10-21 (Europe/Warsaw).
-- **Email word count:** 83, including subject, greeting, and signature; source notes excluded.
+- **Email word count:** 129, including subject, greeting, and signature; source notes excluded.
 
 ## Copyable email
 
@@ -12,7 +12,9 @@ Hi Pedro,
 
 Thanks for taking ownership and clarifying Member Care's role.
 
-I'm asking whether a user-authorized, read-only Oura-to-ChatGPT connector is permitted, not for code or implementation support. Could you share the exact official URL or contact for any applicable approval process and explain how I can request a separate written agreement if one applies here?
+Our planned design is read-only, with explicit user consent through Oura OAuth. Our server would not store Oura passwords or health history; it would retain encrypted OAuth access and refresh tokens plus minimal account-link metadata needed for the connection. This remains subject to Oura's applicable requirements.
+
+I'm asking whether this user-authorized, read-only Oura-to-ChatGPT connector is permitted, not for code or implementation support. Could you share the exact official URL or contact for any applicable approval process and explain how I can request a separate written agreement if one applies here?
 
 If Member Care cannot provide this information, could you forward my case internally to someone who can?
 
