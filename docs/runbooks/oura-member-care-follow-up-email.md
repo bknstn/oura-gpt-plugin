@@ -1,6 +1,6 @@
 # Oura Member Care follow-up — draft
 
-- **Status:** New reply draft prepared for review; the assistant has not sent it. Whether the user sent an earlier draft is unknown.
+- **Status:** Historical draft, superseded by the project owner's archive decision on 2026-10-22. Its body is retained as a record and has not been sent by the assistant; whether the user sent an earlier draft is unknown.
 - **Prepared:** 2026-10-21 (Europe/Warsaw).
 - **Email word count:** 129, including subject, greeting, and signature; source notes excluded.
 

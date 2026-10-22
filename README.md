@@ -1,6 +1,8 @@
 # Oura AI Connector
 
-This repository is at T1: it contains an OAuth architecture decision and a local-only MCP protocol scaffold. The scaffold does not connect to Oura, accept user credentials, or return real health data.
+**Implementation work archived by the project owner on 2026-10-22.** T1 was accepted with a synthetic-only local scaffold; T2 is blocked and not done, and T3–T5 remain queued. No real Oura-to-ChatGPT route has been confirmed or tested. Resume only after a new explicit project-owner instruction and a concrete official route with applicable approval and technical access. See the [project closure record](docs/project-closure.md).
+
+This repository contains an OAuth architecture decision and a local-only MCP protocol scaffold. The scaffold does not connect to Oura, accept user credentials, or return real health data.
 
 ## Requirements
 

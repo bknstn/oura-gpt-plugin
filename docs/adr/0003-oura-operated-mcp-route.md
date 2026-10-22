@@ -5,6 +5,8 @@
 - **Decision owner:** project reviewer; prepared by the T2 implementer for review.
 - **Scope:** assess publicly documented Oura-operated MCP access and compare it with the four-tool ChatGPT connector plan. This ADR does not change `TASKS.md` acceptance criteria.
 
+**Current project status (2026-10-22):** archived by the project owner after a user-provided Member Care reply did not confirm an officially supported/approved route or provide an accessible approval contact. T2 is blocked, not done; see the [project closure record](../project-closure.md). The technical assessment below is retained for reference if work is explicitly resumed.
+
 ## Decision
 
 Keep T2 `in_progress` and stop before Oura auth or user-data runtime work. The public material reviewed defines an Oura-operated MCP Server in the current Agreement, but does not publish a connectable endpoint, client onboarding procedure, protocol/auth contract, tool catalog or schemas, MCP scopes, history/pagination limits, or reviewer path. The developer portal's application area is login-gated. This bounded documentation review does not establish that an Oura MCP service is unavailable; it establishes that its suitability cannot be verified from the public sources available for this iteration.
